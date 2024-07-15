@@ -14,20 +14,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
       - name: Install dependencies
         run: pip install subprocess-run
 
-        
       - name: Check for Terraform files
         id: terraform-check
         run: python scripts/check_terraform_files.py
 
       - name: Run snyk Iac Scan
-        if: success()
+        if: steps.terraform-check.outputs.success == 'true'
         run: echo "Running Snyk IaC scan"
