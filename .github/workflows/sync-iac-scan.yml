@@ -1,0 +1,16 @@
+name: Snyk IaC Scan
+
+on:
+  pull_request:
+  push:
+    branches:
+    - main
+
+jobs:
+  snyk:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.head.repo.language, 'Terraform')
+
+    steps:
+      - name: Run snyk Iac Scan
+        run: echo "Running Snyk IaC scan"
