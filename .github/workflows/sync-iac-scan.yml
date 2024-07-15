@@ -26,14 +26,10 @@ jobs:
         id: terraform-check
         run: python scripts/check_terraform_files.py
 
-      - name: Set output
-        id: set-output
-        run: echo "::set-output name=terraform_files_found::${{ env.TERRAFORM_FILES_FOUND }}"
-
   snyk-iac-scan:
     runs-on: ubuntu-latest
     needs: check-terraform
-    if: needs.check-terraform.outputs.terraform_files_found == 'true'
+    if: needs.check-terraform.outputs.TERRAFORM_FILES_FOUND == 'true'
 
     steps:
       - name: Checkout code
