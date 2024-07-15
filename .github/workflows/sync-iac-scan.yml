@@ -30,7 +30,7 @@ jobs:
         id: set-output
         run: echo "::set-output name=terraform_files_found::${{ env.TERRAFORM_FILES_FOUND }}"
 
-  snyk:
+  snyk-iac-scan:
     runs-on: ubuntu-latest
     needs: check-terraform
     if: needs.check-terraform.outputs.terraform_files_found == 'true'
