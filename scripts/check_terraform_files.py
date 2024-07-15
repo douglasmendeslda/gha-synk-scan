@@ -15,10 +15,9 @@ if __name__ == "__main__":
         # Define a saída usando arquivos de ambiente
         with open(os.environ['GITHUB_ENV'], 'a') as env_file:
             env_file.write("TERRAFORM_FILES_FOUND=true\n")
-        exit(0)
     else:
         print("No Terraform files found.")
         # Define a saída usando arquivos de ambiente
         with open(os.environ['GITHUB_ENV'], 'a') as env_file:
             env_file.write("TERRAFORM_FILES_FOUND=false\n")
-        exit(1)
+    exit(0)
