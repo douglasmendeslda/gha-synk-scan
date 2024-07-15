@@ -9,8 +9,29 @@ on:
 jobs:
   snyk:
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.head.repo.language, 'Terraform')
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: List changed files
+        id: changed-files
+        run: |
+          git fetch origin main
+          git diff --name-only origin/main...HEAD > changed_files.txt
+          cat changed_files.txt
+
+      - name: Check for Terraform files
+        id: terraform-check
+        run: |
+          if grep -q '\.tf$' changed_files.txt; then
+            echo "Terraform files detected."
+            echo "::set-output name=terraform::true"
+          else
+            echo "No Terraform files detected."
+            echo "::set-output name=terraform::false"
+          fi
+
       - name: Run snyk Iac Scan
+        if: steps.terraform-check.outputs.terraform == 'true'
         run: echo "Running Snyk IaC scan"
