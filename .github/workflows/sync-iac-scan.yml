@@ -47,3 +47,13 @@ jobs:
         run: snyk iac test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          
+      - name: Comment on Pull Request
+        uses: ./  # Caminho relativo à raiz do repositório
+        with:
+          message: 'Your custom message here'
+        env:
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPOSITORY_NAME: ${{ github.event.pull_request.head.repo.name }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
