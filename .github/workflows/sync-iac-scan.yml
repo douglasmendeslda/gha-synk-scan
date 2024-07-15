@@ -27,5 +27,5 @@ jobs:
         run: python scripts/check_terraform_files.py
 
       - name: Run snyk Iac Scan
-        if: steps.terraform-check.outputs.success == 'true'
+        if: env.TERRAFORM_FILES_FOUND == 'true'
         run: echo "Running Snyk IaC scan"
