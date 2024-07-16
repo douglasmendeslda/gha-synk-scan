@@ -19,48 +19,46 @@ runs:
           echo "found=false" >> $GITHUB_ENV
         fi
 
-    - name: Set up Node.js
+    - name: 'Set up Node.js'
       if: env.found == 'true'
       shell: bash
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22.4.1'
+      run: |
+        curl -sL https://deb.nodesource.com/setup_16.x | bash -
+        apt-get install -y nodejs
 
-    - name: Install Snyk CLI
+    - name: 'Install Snyk CLI'
       if: env.found == 'true'
       shell: bash
       run: npm install -g snyk
 
-    - name: Authenticate Snyk
+    - name: 'Authenticate Snyk'
       if: env.found == 'true'
       shell: bash
       env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        SNYK_TOKEN: ${{ inputs.snyk-token }}
       run: snyk auth $SNYK_TOKEN
-    
+
     - name: 'Run Snyk IaC Test'
       if: env.found == 'true'
       shell: bash
       env:
         SNYK_TOKEN: ${{ inputs.snyk-token }}
       run: |
-          snyk iac test > snyk_output.txt || true
-          echo "Snyk test output:"
-          cat snyk_output.txt
-          TEST_OUTPUT=$(cat snyk_output.txt)
-          echo "SNYK_TEST_OUTPUT<<EOF" >> $GITHUB_ENV
-          echo "${TEST_OUTPUT}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          echo "Test output captured."
+        snyk iac test > snyk_output.txt || true
+        echo "Snyk test output:"
+        cat snyk_output.txt
+        TEST_OUTPUT=$(cat snyk_output.txt)
+        echo "SNYK_TEST_OUTPUT<<EOF" >> $GITHUB_ENV
+        echo "${TEST_OUTPUT}" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+        echo "Test output captured."
 
-      - name: Use Pull Request Decoration Action
-        if: ${{ env.SNYK_TEST_OUTPUT != '' }}
-        shell: bash
-        uses: douglasmendeslda/gha-pull-request-decoration@v1.1
-        with:
-          message: ${{ env.SNYK_TEST_OUTPUT }}
-        env:
-          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
-          GITHUB_REPOSITORY_NAME: ${{ github.event.pull_request.head.repo.name }}
-          GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: 'Use Pull Request Decoration Action'
+      if: env.SNYK_TEST_OUTPUT != ''
+      shell: bash
+      run: |
+        echo "Decorating PR with Snyk output"
+        curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+        -H "Content-Type: application/json" \
+        -d '{"body":"**Snyk IaC Test Output:**\n```'${{ env.SNYK_TEST_OUTPUT }}'```"}' \
+        "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
