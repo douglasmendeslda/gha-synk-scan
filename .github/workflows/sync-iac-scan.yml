@@ -5,7 +5,9 @@ on:
   push:
     branches:
     - main
-    
+env:
+  SCAN_OUTPUT: ""
+  
 permissions:
   contents: read
   issues: write
@@ -50,13 +52,15 @@ jobs:
       - name: Run Snyk Test
         id: snyk-test
         run: |
-          SNYK_OUTPUT=$(snyk iac test)
+          snyk iac test > output.txt
+          cat output.txt
+          SCAN_OUTPUT=$(cat output.txt)
 
       - name: Use Pull Request Decoration Action
         uses: douglasmendeslda/gha-pull-request-decoration@v1.1
         if: always()
         with:
-          message: ${{ env.SNYK_OUTPUT }}
+          message: ${{ env.SCAN_OUTPUT }}
         env:
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GITHUB_REPOSITORY_NAME: ${{ github.event.pull_request.head.repo.name }}
