@@ -47,17 +47,18 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: snyk auth $SNYK_TOKEN
 
-      - name: Run snyk Iac Scan
-        if: env.TERRAFORM_FILES_FOUND == 'true'
+      - name: Run Snyk Test
+        id: snyk-test
         run: |
           snyk iac test > snyk_output.txt
-          echo "SNYK_TEST_SUMMARY=$(tail -n 20 snyk_output.txt)" >> $GITHUB_ENV
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          
-      - name: Comment on Pull Request
+          echo "Snyk test output:"
+          cat snyk_output.txt
+          TEST_SUMMARY=$(tail -n 20 snyk_output.txt)
+          echo "SNYK_TEST_SUMMARY=${TEST_SUMMARY}" >> $GITHUB_ENV
+          echo "Test summary captured: ${TEST_SUMMARY}"
+
+      - name: Use Pull Request Decoration Action
         uses: douglasmendeslda/gha-pull-request-decoration@v1.1
-        if: always()
         with:
           message: ${{ env.SNYK_TEST_SUMMARY }}
         env:
