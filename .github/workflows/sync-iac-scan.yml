@@ -51,7 +51,7 @@ jobs:
 
       - name: Run Snyk Test
         id: snyk-test
-        continue-on-error: true
+        if: env.TERRAFORM_FILES_FOUND == 'true'
         run: |
           snyk iac test > snyk_output.txt || true
           echo "Snyk test output:"
@@ -61,6 +61,7 @@ jobs:
           echo "${TEST_OUTPUT}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
           echo "Test output captured."
+          
       - name: Check if Snyk Test Output is Empty
         run: |
           if [ -z "${{ env.SNYK_TEST_OUTPUT }}" ]; then
@@ -68,14 +69,8 @@ jobs:
             exit 1
           fi
 
-      - name: Upload Snyk Output Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: snyk-output
-          path: snyk_output.txt
-
       - name: Use Pull Request Decoration Action
-        if: always()
+        if: ${{ env.SNYK_TEST_OUTPUT != '' }}
         uses: douglasmendeslda/gha-pull-request-decoration@v1.1
         with:
           message: ${{ env.SNYK_TEST_OUTPUT }}
