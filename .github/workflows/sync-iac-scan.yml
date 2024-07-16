@@ -49,7 +49,9 @@ jobs:
 
       - name: Run snyk Iac Scan
         if: env.TERRAFORM_FILES_FOUND == 'true'
-        run: snyk iac test
+        run: |
+          snyk iac test > snyk_output.txt
+          echo "SNYK_TEST_SUMMARY=$(tail -n 20 snyk_output.txt)" >> $GITHUB_ENV
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           
@@ -57,7 +59,7 @@ jobs:
         uses: douglasmendeslda/gha-pull-request-decoration@v1.1
         if: always()
         with:
-          message: 'Your custom message here'
+          message: ${{ env.SNYK_TEST_SUMMARY }}
         env:
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GITHUB_REPOSITORY_NAME: ${{ github.event.pull_request.head.repo.name }}
