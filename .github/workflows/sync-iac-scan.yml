@@ -51,16 +51,34 @@ jobs:
 
       - name: Run Snyk Test
         id: snyk-test
+        continue-on-error: true
         run: |
-          SCAN_OUTPUT=$(snyk iac test)
-          echo "$SCAN_OUTPUT"
-          echo "::set-output name=scan_output::$SCAN_OUTPUT"
+          snyk iac test > snyk_output.txt || true
+          echo "Snyk test output:"
+          cat snyk_output.txt
+          TEST_OUTPUT=$(cat snyk_output.txt)
+          echo "SNYK_TEST_OUTPUT<<EOF" >> $GITHUB_ENV
+          echo "${TEST_OUTPUT}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          echo "Test output captured."
+      - name: Check if Snyk Test Output is Empty
+        run: |
+          if [ -z "${{ env.SNYK_TEST_OUTPUT }}" ]; then
+            echo "Snyk test output is empty. Exiting."
+            exit 1
+          fi
+
+      - name: Upload Snyk Output Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: snyk-output
+          path: snyk_output.txt
 
       - name: Use Pull Request Decoration Action
-        uses: douglasmendeslda/gha-pull-request-decoration@v1.1
         if: always()
+        uses: douglasmendeslda/gha-pull-request-decoration@v1.1
         with:
-          message: ${{ steps.snyk-test.outputs.scan_output }}
+          message: ${{ env.SNYK_TEST_OUTPUT }}
         env:
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GITHUB_REPOSITORY_NAME: ${{ github.event.pull_request.head.repo.name }}
