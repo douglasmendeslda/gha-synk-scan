@@ -50,18 +50,13 @@ jobs:
       - name: Run Snyk Test
         id: snyk-test
         run: |
-          snyk iac test > snyk_output.txt
-          echo "Snyk test output:"
-          cat snyk_output.txt
-          TEST_SUMMARY=$(tail -n 20 snyk_output.txt)
-          echo "SNYK_TEST_SUMMARY=${TEST_SUMMARY}" >> $GITHUB_ENV
-          echo "Test summary captured: ${TEST_SUMMARY}"
+          SNYK_OUTPUT=$(snyk iac test)
 
       - name: Use Pull Request Decoration Action
         uses: douglasmendeslda/gha-pull-request-decoration@v1.1
         if: always()
         with:
-          message: ${{ env.SNYK_TEST_SUMMARY }}
+          message: ${{ env.SNYK_OUTPUT }}
         env:
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GITHUB_REPOSITORY_NAME: ${{ github.event.pull_request.head.repo.name }}
