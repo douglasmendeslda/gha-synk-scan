@@ -58,6 +58,7 @@ runs:
         echo "Test output captured."
           
     - name: Check if Snyk Test Output is Empty
+      if: steps.terraform-check.outputs.terraform_files_found == 'true'
       run: |
         if [ -z "${{ env.SNYK_TEST_OUTPUT }}" ]; then
           echo "Snyk test output is empty. Exiting."
