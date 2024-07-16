@@ -50,6 +50,7 @@ jobs:
           
       - name: Comment on Pull Request
         uses: ./  # Caminho relativo à raiz do repositório
+        if: always()
         with:
           message: 'Your custom message here'
         env:
