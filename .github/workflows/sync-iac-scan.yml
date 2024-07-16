@@ -52,13 +52,15 @@ jobs:
       - name: Run Snyk Test
         id: snyk-test
         run: |
-          snyk iac test >> $SCAN_OUTPUT
+          SCAN_OUTPUT=$(snyk iac test)
+          echo "$SCAN_OUTPUT"
+          echo "::set-output name=scan_output::$SCAN_OUTPUT"
 
       - name: Use Pull Request Decoration Action
         uses: douglasmendeslda/gha-pull-request-decoration@v1.1
         if: always()
         with:
-          message: ${{ env.SCAN_OUTPUT }}
+          message: ${{ steps.snyk-test.outputs.scan_output }}
         env:
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GITHUB_REPOSITORY_NAME: ${{ github.event.pull_request.head.repo.name }}
