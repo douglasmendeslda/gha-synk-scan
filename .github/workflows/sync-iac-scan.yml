@@ -59,6 +59,7 @@ jobs:
 
       - name: Use Pull Request Decoration Action
         uses: douglasmendeslda/gha-pull-request-decoration@v1.1
+        if: always()
         with:
           message: ${{ env.SNYK_TEST_SUMMARY }}
         env:
