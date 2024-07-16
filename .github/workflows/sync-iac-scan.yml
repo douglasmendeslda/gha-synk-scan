@@ -61,7 +61,7 @@ jobs:
         uses: douglasmendeslda/gha-pull-request-decoration@v1.1
         if: always()
         with:
-          message: $SCAN_OUTPUT
+          message: "{{ env.SCAN_OUTPUT }}"
         env:
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GITHUB_REPOSITORY_NAME: ${{ github.event.pull_request.head.repo.name }}
