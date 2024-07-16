@@ -23,10 +23,12 @@ runs:
   
     - name: Install dependencies
       run: pip install subprocess-run
+      shell: bash
 
     - name: Check for Terraform files
       id: terraform-check
       run: python scripts/check_terraform_files.py
+      shell: bash
 
     - name: Set up Node.js
       if: steps.terraform-check.outputs.terraform_files_found == 'true'
@@ -37,12 +39,14 @@ runs:
     - name: Install Snyk CLI
       if: steps.terraform-check.outputs.terraform_files_found == 'true'
       run: npm install -g snyk
+      shell: bash
 
     - name: Authenticate Snyk
       if: steps.terraform-check.outputs.terraform_files_found == 'true'
       env:
         SNYK_TOKEN: ${{ inputs.snyk_token }}
       run: snyk auth $SNYK_TOKEN
+      shell: bash
 
     - name: Run Snyk Test
       id: snyk-test
@@ -56,14 +60,15 @@ runs:
         echo "${TEST_OUTPUT}" >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
         echo "Test output captured."
-          
+      shell: bash
+
     - name: Check if Snyk Test Output is Empty
-      if: steps.terraform-check.outputs.terraform_files_found == 'true'
       run: |
         if [ -z "${{ env.SNYK_TEST_OUTPUT }}" ]; then
           echo "Snyk test output is empty. Exiting."
           exit 1
         fi
+      shell: bash
 
     - name: Use Pull Request Decoration Action
       if: ${{ env.SNYK_TEST_OUTPUT != '' }}
