@@ -27,7 +27,7 @@ runs:
 
     - name: Check for Terraform files
       id: terraform-check
-      run: python scripts/check_terraform_files.py
+      run: python ./scripts/check_terraform_files.py
       shell: bash
 
     - name: Set up Node.js
