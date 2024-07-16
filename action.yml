@@ -11,6 +11,7 @@ runs:
   steps:
     - name: 'Check for .tf files'
       id: check_tf_files
+      shell: bash
       run: |
         if git ls-files '*.tf' | grep -q .; then
           echo "found=true" >> $GITHUB_ENV
@@ -20,22 +21,26 @@ runs:
 
     - name: Set up Node.js
       if: env.found == 'true'
+      shell: bash
       uses: actions/setup-node@v4
       with:
         node-version: '22.4.1'
 
     - name: Install Snyk CLI
       if: env.found == 'true'
+      shell: bash
       run: npm install -g snyk
 
     - name: Authenticate Snyk
       if: env.found == 'true'
+      shell: bash
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       run: snyk auth $SNYK_TOKEN
     
     - name: 'Run Snyk IaC Test'
       if: env.found == 'true'
+      shell: bash
       env:
         SNYK_TOKEN: ${{ inputs.snyk-token }}
       run: |
@@ -47,9 +52,10 @@ runs:
           echo "${TEST_OUTPUT}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
           echo "Test output captured."
-          
+
       - name: Use Pull Request Decoration Action
         if: ${{ env.SNYK_TEST_OUTPUT != '' }}
+        shell: bash
         uses: douglasmendeslda/gha-pull-request-decoration@v1.1
         with:
           message: ${{ env.SNYK_TEST_OUTPUT }}
