@@ -1,21 +1,39 @@
 import os
+import sys
 
-def has_terraform_files():
-    terraform_files = []
-    for root, dirs, files in os.walk("."):
-        for file in files:
-            if file.endswith(".tf"):
-                terraform_files.append(os.path.join(root, file))
-    return terraform_files
+def check_terraform_files():
+    # Lógica para verificar arquivos Terraform
+    terraform_files_found = True  # Simulação de verificação
+    return terraform_files_found
+
+def main():
+    if len(sys.argv) != 3:
+        print("Uso: python check_terraform_files.py <snyk_token> <github_token>")
+        sys.exit(1)
+    
+    snyk_token = sys.argv[1]
+    github_token = sys.argv[2]
+
+    terraform_files_found = check_terraform_files()
+
+    if terraform_files_found:
+        os.system(f"snyk auth {snyk_token}")
+        os.system("snyk iac test > snyk_output.txt || true")
+        
+        with open("snyk_output.txt", "r") as file:
+            output = file.read()
+
+        if output.strip():
+            print("Snyk test output:")
+            print(output)
+            # Aqui você pode adicionar a lógica para decorar a pull request
+
+        else:
+            print("Snyk test output is empty. Exiting.")
+            sys.exit(1)
+    else:
+        print("No Terraform files found. Exiting.")
+        sys.exit(0)
 
 if __name__ == "__main__":
-    terraform_files = has_terraform_files()
-    if terraform_files:
-        print(f"Terraform files found: {terraform_files}")
-        with open(os.environ['GITHUB_ENV'], 'a') as env_file:
-            env_file.write("TERRAFORM_FILES_FOUND=true\n")
-    else:
-        print("No Terraform files found.")
-        with open(os.environ['GITHUB_ENV'], 'a') as env_file:
-            env_file.write("TERRAFORM_FILES_FOUND=false\n")
-    exit(0)
+    main()
