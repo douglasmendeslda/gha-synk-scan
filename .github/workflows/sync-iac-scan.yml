@@ -55,12 +55,13 @@ jobs:
           snyk iac test > output.txt
           cat output.txt
           SCAN_OUTPUT=$(cat output.txt)
+          echo $SCAN_OUTPUT
 
       - name: Use Pull Request Decoration Action
         uses: douglasmendeslda/gha-pull-request-decoration@v1.1
         if: always()
         with:
-          message: ${{ env.SCAN_OUTPUT }}
+          message: $SCAN_OUTPUT
         env:
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GITHUB_REPOSITORY_NAME: ${{ github.event.pull_request.head.repo.name }}
